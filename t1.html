@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vanilla</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.6.9/ethers.umd.min.js" type="application/javascript"></script>
+    <script src="https://jiggleos.com/abi.js" type="application/javascript"></script>
+
+</head>
+<script>
+    const provider = new ethers.providers.JsonRpcProvider("https://eth-mainnet.alchemyapi.io/jsonrpc/lXxXzr3Jes3ZO6rqH-ppgeNY2Mr3_2C6");
+    const address = `0x2E88Fb70b11bf2B1CF1A6E2f9853f933C1A4cC2a`;
+
+    let contract = new ethers.Contract(address, abi, provider);
+
+    contract.totalSupply().then(function(totalSupply) {
+        console.log(totalSupply.toString());
+    });
+
+    contract.remainingSupply().then(function(remainingSupply) {
+        console.log(remainingSupply.toString());
+    });
+
+    function totalsupply() {
+        contract.totalSupply().then(function(totalSupply) {
+            document.getElementById("tSupply").innerHTML = totalSupply.toString();
+            console.log(totalSupply.toString());
+        });
+    }
+
+    function remainingsupply() {
+        contract.remainingSupply().then(function(remainingSupply) {
+            document.getElementById("rSupply").innerHTML = remainingSupply.toString();
+            console.log(remainingSupply.toString());
+        });
+    }
+
+
+    function drawFreeSVG(x) {
+        console.log(x);
+        contract.drawFreeSVG(x).then(function(result) {
+            document.getElementById("iframe").src = result;
+
+        });
+    }
+
+    function randomnumber() {
+        input.value = Math.floor(Math.random() * 100000) + 1;
+    }
+</script>
+
+<body onload="totalsupply(), remainingsupply()">
+    <div>
+        <h3>Minted: <span id="tSupply"></span></h3>
+        <h3>Remaining Supply is: <span id="rSupply"></span></h3>
+    </div>
+<div>
+    <iframe id="iframe" width="500" height="500"></iframe>
+    <br>
+    <button onclick="randomnumber()">Random</button>
+    Seed <input type="number" name="Seed" id="input">
+    <button onclick="drawFreeSVG(document.getElementById('input').value)">Draw SVG</button>
+</div>
+
+<div>
+
+</div>
+
+</body>
+</html>
