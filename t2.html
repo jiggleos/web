@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vanilla</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.6.9/ethers.umd.min.js" type="application/javascript"></script>
+    <script src="https://jiggleos.com/abi.js" type="application/javascript"></script>
+
+</head>
+<script>
+    const provider = new ethers.providers.JsonRpcProvider("https://eth-mainnet.alchemyapi.io/jsonrpc/lXxXzr3Jes3ZO6rqH-ppgeNY2Mr3_2C6");
+    const address = `0x2E88Fb70b11bf2B1CF1A6E2f9853f933C1A4cC2a`;
+    let contract = new ethers.Contract(address, abi, provider);
+
+    function totalsupply() {
+        contract.totalSupply().then(function(totalSupply) {
+            document.getElementById("tSupply").innerHTML = totalSupply.toString();
+            console.log(totalSupply.toString());
+        });
+    }
+
+    function remainingsupply() {
+        contract.remainingSupply().then(function(remainingSupply) {
+            document.getElementById("rSupply").innerHTML = remainingSupply.toString();
+            console.log(remainingSupply.toString());
+        });
+    }
+
+    function drawFreeSVG(x) {
+        console.log(x);
+        let onfulfilled = function (result) {
+            document.getElementById("iframe").src = result;
+            document.getElementById("status").innerHTML =`Seed - ${x}`;
+        };
+        contract.drawFreeSVG(x)
+            .then(onfulfilled)
+            .catch(function(error) {
+                //alert(`Error: ${error.reason}`);
+                document.getElementById("status").innerHTML = `Try another number.&nbsp ${error.reason}`;
+            });
+    }
+
+    function randomnumber() {
+        input.value = Math.floor(Math.random() * 4294967295) + 1;
+    }
+</script>
+
+<body onload="totalsupply(); remainingsupply();">
+<div>
+    <h3>Minted: <span id="tSupply"></span></h3>
+    <h3>Remaining Supply: <span id="rSupply"></span></h3>
+</div>
+<div>
+    <h4>Status: <span id="status"></span></h4>
+    <iframe id="iframe" width="500" height="500"></iframe>
+    <br>
+    <button onclick="randomnumber()">Random</button>
+    <label for="input">Seed </label><input type="number" name="Seed" id="input">
+    <button onclick="drawFreeSVG(document.getElementById('input').value)">Draw SVG</button>
+</div>
+</body>
+</html>
