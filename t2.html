@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>T2</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.6.9/ethers.umd.min.js" type="application/javascript"></script>
+    <script src="https://jiggleos.com/abi.js" type="application/javascript"></script>
+    <script src="mersenne-twister.js"></script>
+    <script src="https://randojs.com/2.0.0.js"></script>
+</head>
+<script>
+    //const provider = new ethers.providers.Web3Provider(window.ethereum);
+    //const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    const provider = new ethers.providers.JsonRpcProvider("https://eth-mainnet.alchemyapi.io/jsonrpc/lXxXzr3Jes3ZO6rqH-ppgeNY2Mr3_2C6");
+    const address = `0x2E88Fb70b11bf2B1CF1A6E2f9853f933C1A4cC2a`;
+    const contract = new ethers.Contract(address, abi, provider);
+    let generator = new MersenneTwister();
+
+
+
+    function totalsupply() {
+        contract.totalSupply().then(function(totalSupply) {
+            document.getElementById("tSupply").innerHTML = totalSupply.toString();
+            console.log(totalSupply.toString());
+        });
+    }
+
+    function remainingsupply() {
+        contract.remainingSupply().then(function(remainingSupply) {
+            document.getElementById("rSupply").innerHTML = remainingSupply.toString();
+            console.log(remainingSupply.toString());
+        });
+    }
+
+    function drawFreeSVG(x) {
+        console.log(x);
+        let onfulfilled = function (result) {
+            document.getElementById("iframe").src = result;
+            document.getElementById("status").innerHTML =`Seed - ${x}`;
+        };
+        contract.drawFreeSVG(x)
+            .then(onfulfilled)
+            .catch(function(error) {
+                //alert(`Error: ${error.reason}`);
+                document.getElementById("status").innerHTML = `Try another number.&nbsp ${error.reason}`;
+            });
+    }
+
+
+    async function connect() {
+        if (typeof window.ethereum !== "undefined") {
+            try {
+                await ethereum.request({ method: "eth_requestAccounts" });
+            } catch (error) {
+                console.log(error);
+                document.getElementById("status").innerHTML = `error: ${error}`;
+            }
+            const accounts = await ethereum.request({ method: "eth_accounts" });
+            console.log(accounts);
+            document.getElementById("status").innerHTML = `Connected to ${accounts[0]}`;
+        } else {
+            document.getElementById("status").innerHTML = "Please install MetaMask";
+        }
+    }
+
+
+ /*   //listen for transfer events
+    contract.on("Transfer", function(from, to, value) {
+        console.log("Transfer", from, to, value);
+        document.getElementById("status").innerHTML = `Transfer ${value} from ${from} to ${to}`;
+    });*/
+
+
+    async function mint() {
+        try {
+            const mintPrice = ethers.utils.parseEther('.0');
+            let mintSeed = document.getElementById('randomSeed').value;
+            let mintName = document.getElementById('tokenName').value;
+            const signer = provider.getSigner();
+            const contract = new ethers.Contract(address, abi, signer);
+            const tx = await contract.mint(mintSeed, mintName, { value: mintPrice });
+            console.log(tx);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
+    function randomnumber() {
+        //document.getElementById("randomSeed").value = generator.random_int();
+        document.getElementById("randomSeed").value = rando(1, 4294967295);
+
+    }
+
+</script>
+
+<body onload="totalsupply(); remainingsupply();">
+<div>
+    <h3>Minted: <span id="tSupply"></span></h3>
+    <h3>Remaining Supply: <span id="rSupply"></span></h3>
+    <button onclick="connect()">Connect</button><br>
+<button onclick="mint()">Mint</button>
+    <label for="tokenName">Name</label><input type="text" name="Name" id="tokenName">
+</div>
+<div>
+    <h4>Status: <span id="status"></span></h4>
+    <iframe id="iframe" width="500" height="500"></iframe>
+    <br>
+    <button onclick="randomnumber()">Random</button>
+    <label for="randomSeed"></label><input type="number" name="Random Seed" id="randomSeed" value="">
+    <button onclick="drawFreeSVG(document.getElementById('randomSeed').value)">Draw</button>
+</div>
+<div>
+</div>
+</body>
+</html>
